@@ -1,8 +1,7 @@
-﻿using Habit_Loger;
+﻿using Habit_Logger;
 
 const string connectionString = "Data Source=habits.db";
-var inputManager = new InputManager();
-var databaseManager = new DatabaseManager(connectionString, inputManager);
+var databaseManager = new DatabaseManager(connectionString);
 
 
 var exitApp = false;
@@ -26,17 +25,17 @@ do
             break;
         case "2":
             databaseManager.ViewHabits();
+            InputManager.PressSpaceToContinue();
             break;
         case "3":
-            Console.WriteLine("dupa");
             // EditHabit();
             break;
         case "4":
-            Console.WriteLine("dupa");
-            // DeleteHabit();
+            databaseManager.DeleteHabit();
+            InputManager.PressSpaceToContinue();
             break;
         case "0":
-            inputManager.ExitApp();
+            InputManager.ExitApp();
             exitApp = true;
             break;
         default:

@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Habit-Loger", "Habit-Loger\Habit-Loger.csproj", "{2113CF20-9D6E-472A-9B40-7C8425818583}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Habit-Logger", "Habit-Logger\Habit-Logger.csproj", "{2113CF20-9D6E-472A-9B40-7C8425818583}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

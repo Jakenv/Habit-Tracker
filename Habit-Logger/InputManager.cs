@@ -1,8 +1,8 @@
-namespace Habit_Loger;
+namespace Habit_Logger;
 
-public class InputManager
+public abstract class InputManager
 {
-    public int GetQuantityInput()
+    public static int GetQuantityInput()
     {
         Console.WriteLine("Please enter quantity: ");
         var quantityInput = Console.ReadLine();
@@ -15,7 +15,7 @@ public class InputManager
         return GetQuantityInput();
     }
 
-    public string GetDateInput()
+    public static string GetDateInput()
     {
         Console.WriteLine("Please enter valid date (dd/mm/yyyy): ");
         var dateInput = Console.ReadLine();
@@ -28,13 +28,22 @@ public class InputManager
         return GetDateInput();
     }
 
-    public void PressSpaceToContinue()
+    public static int GetId()
+    {
+        while (true)
+        {
+            var input = int.TryParse(Console.ReadLine(), out var id);
+            if (input) return id;
+        }
+    }
+
+    public static void PressSpaceToContinue()
     {
         Console.WriteLine("Press space to continue");
         Console.ReadKey();
     }
 
-    public void ExitApp()
+    public static void ExitApp()
     {
         Console.Clear();
         Console.WriteLine("Closing App...");
