@@ -10,7 +10,7 @@ public class DatabaseManager
     
     public DatabaseManager(string connectionString, InputManager inputManager)
     {
-        this._inputManager = inputManager;
+        _inputManager = inputManager;
         _connection = new SqliteConnection(connectionString);
         _command = _connection.CreateCommand();
         InitializeDatabase();
@@ -53,15 +53,14 @@ public class DatabaseManager
     {
         var date = _inputManager.GetDateInput();
         var quantity = _inputManager.GetQuantityInput();
-        var reader = ExecuteSql($@"INSERT INTO drinking_water (DATE, Quantity) VALUES ('{date}', {quantity})");
+        using var reader = ExecuteSql($@"INSERT INTO drinking_water (DATE, Quantity) VALUES ('{date}', {quantity})");
         if (reader != null)
             _inputManager.PressSpaceToContinue();
     }
 
     public void ViewHabits()
     {
-        var reader = ExecuteSql("SELECT * FROM drinking_water");
-        if (reader != null)
+        using (var reader = ExecuteSql("SELECT * FROM drinking_water"))
         {
             while (reader.Read())
             {
@@ -70,7 +69,7 @@ public class DatabaseManager
                 var quantity = reader.GetInt32(2);
                 Console.WriteLine($"Id: {id}, Date: {date}, Quantity: {quantity}");
             }
-            _inputManager.PressSpaceToContinue();
         }
+        _inputManager.PressSpaceToContinue();
     }
 }

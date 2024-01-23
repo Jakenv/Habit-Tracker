@@ -33,4 +33,10 @@ public class InputManager
         Console.WriteLine("Press space to continue");
         Console.ReadKey();
     }
+
+    public void ExitApp()
+    {
+        Console.Clear();
+        Console.WriteLine("Closing App...");
+    }
 }

@@ -36,6 +36,7 @@ do
             // DeleteHabit();
             break;
         case "0":
+            inputManager.ExitApp();
             exitApp = true;
             break;
         default:
