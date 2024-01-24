@@ -28,7 +28,8 @@ do
             InputManager.PressSpaceToContinue();
             break;
         case "3":
-            // EditHabit();
+            databaseManager.EditHabit();
+            InputManager.PressSpaceToContinue();
             break;
         case "4":
             databaseManager.DeleteHabit();

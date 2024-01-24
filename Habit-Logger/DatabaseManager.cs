@@ -4,20 +4,21 @@ namespace Habit_Logger;
 
 public class DatabaseManager
 {
-    private readonly SqliteConnection _connection;
-    private readonly SqliteCommand _command;
-
+    private readonly string _connectionString;
+    
     public DatabaseManager(string connectionString)
     {
-        _connection = new SqliteConnection(connectionString);
-        _command = _connection.CreateCommand();
+        _connectionString = connectionString;
         InitializeDatabase();
     }
 
     private void InitializeDatabase()
     {
-        _connection.Open();
-        _command.CommandText =
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+        
+        using var command = connection.CreateCommand();
+        command.CommandText =
             """
             CREATE TABLE IF NOT EXISTS drinking_water (
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,27 +26,30 @@ public class DatabaseManager
                         Quantity INTEGER
                     )
             """;
-        _command.ExecuteNonQuery();
-        _connection.Close();
+        command.ExecuteNonQuery();
     }
 
-    private SqliteDataReader? ExecuteSql(string commandText)
+    private SqliteDataReader? ExecuteSql(string commandText, params SqliteParameter[] parameters)
     {
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+         
+        using var command = connection.CreateCommand();
+        command.CommandText = commandText;
+        
+        foreach (var parameter in parameters)
+        {
+            command.Parameters.Add(parameter);
+        }
+        
         try
         {
-            _connection.Open();
-            _command.CommandText = commandText;
-            var reader = _command.ExecuteReader();
-            return reader;
+            return command.ExecuteReader();
         }
         catch (SqliteException ex)
         {
             Console.WriteLine($"An error occured while executing the SQL command: {ex.Message}");
             return null;
-        }
-        finally
-        {
-            _connection.Close();
         }
     }
 
@@ -53,7 +57,11 @@ public class DatabaseManager
     {
         var date = InputManager.GetDateInput();
         var quantity = InputManager.GetQuantityInput();
-        using var reader = ExecuteSql($"INSERT INTO drinking_water (DATE, Quantity) VALUES ('{date}', {quantity})");
+        ExecuteSql(
+            "INSERT INTO drinking_water (DATE, Quantity) VALUES (@date, @quantity)",
+            new SqliteParameter("@date", date),
+            new SqliteParameter("@quantity", quantity)
+        );
     }
 
     public void ViewHabits()
@@ -68,16 +76,13 @@ public class DatabaseManager
         }
     }
 
-    private int RecordCount()
+    private bool RecordExits(int id)
     {
-        int count;
-        using var command = new SqliteCommand("SELECT COUNT(*) FROM drinking_water", _connection);
-        {  
-            _connection.Open();
-            count = Convert.ToInt32(command.ExecuteScalar());
-            _connection.Close();
-        }
-        return count;
+        using var reader = ExecuteSql(
+            "SELECT * FROM drinking_water WHERE Id = @id",
+            new SqliteParameter("@id", id)
+        );
+        return reader != null && reader.Read();
     }
 
     public void DeleteHabit()
@@ -85,14 +90,34 @@ public class DatabaseManager
         Console.WriteLine("What do you want to delete?\n");
         ViewHabits();
         var id = InputManager.GetId();
-        if (id > RecordCount())
+        if (!RecordExits(id))
             Console.WriteLine("Record don't exist, chose different ID");
         else
         {
-            using var deletion = new SqliteCommand($"DELETE FROM drinking_water WHERE Id = {id}", _connection);
-            _connection.Open();
-            deletion.ExecuteNonQuery();
-            _connection.Close();
+            ExecuteSql(
+                "DELETE FROM drinking_water WHERE Id = @id",
+                new SqliteParameter("@id", id)
+            );
+        }
+    }
+    
+    public void EditHabit()
+    {
+        Console.WriteLine("What do you want to edit?\n");
+        ViewHabits();
+        var id = InputManager.GetId();
+        if (!RecordExits(id))
+            Console.WriteLine("Record don't exist, chose different ID");
+        else
+        {
+            var date = InputManager.GetDateInput();
+            var quantity = InputManager.GetQuantityInput();
+            ExecuteSql(
+                "UPDATE drinking_water SET DATE = @date, Quantity = @quantity WHERE Id = @id",
+                new SqliteParameter("@date", date),
+                new SqliteParameter("@quantity", quantity),
+                new SqliteParameter("@id", id)
+            );
         }
     }
 }
