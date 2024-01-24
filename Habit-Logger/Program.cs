@@ -1,4 +1,4 @@
-﻿using Habit_Logger;
+﻿using Habit_Loger;
 
 const string connectionString = "Data Source=habits.db";
 var databaseManager = new DatabaseManager(connectionString);

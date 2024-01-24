@@ -1,23 +1,21 @@
 using Microsoft.Data.Sqlite;
 
-namespace Habit_Logger;
+namespace Habit_Loger;
 
 public class DatabaseManager
 {
-    private readonly string _connectionString;
+    private readonly SqliteConnection _connection;
     
     public DatabaseManager(string connectionString)
     {
-        _connectionString = connectionString;
+        _connection = new SqliteConnection(connectionString);
+        _connection.Open();
         InitializeDatabase();
     }
 
     private void InitializeDatabase()
     {
-        using var connection = new SqliteConnection(_connectionString);
-        connection.Open();
-        
-        using var command = connection.CreateCommand();
+        using var command = _connection.CreateCommand();
         command.CommandText =
             """
             CREATE TABLE IF NOT EXISTS drinking_water (
@@ -29,28 +27,33 @@ public class DatabaseManager
         command.ExecuteNonQuery();
     }
 
-    private SqliteDataReader? ExecuteSql(string commandText, params SqliteParameter[] parameters)
+    private List<DrinkingWaterRecords> ExecuteSql(string commandText, params SqliteParameter[] parameters)
     {
-        using var connection = new SqliteConnection(_connectionString);
-        connection.Open();
-         
-        using var command = connection.CreateCommand();
+        using var command = _connection.CreateCommand();
         command.CommandText = commandText;
-        
+         
         foreach (var parameter in parameters)
         {
             command.Parameters.Add(parameter);
         }
         
+        var records = new List<DrinkingWaterRecords>();
         try
         {
-            return command.ExecuteReader();
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                var id = reader.GetInt32(0);
+                var date = reader.FieldCount > 1 ? reader.GetString(1) : null;
+                var quantity = reader.FieldCount > 2 ? reader.GetInt32(2) : 0;
+                records.Add(new DrinkingWaterRecords(id, date, quantity));
+            }
         }
         catch (SqliteException ex)
         {
             Console.WriteLine($"An error occured while executing the SQL command: {ex.Message}");
-            return null;
         }
+        return records;
     }
 
     public void AddHabit()
@@ -64,25 +67,33 @@ public class DatabaseManager
         );
     }
 
+    private List<DrinkingWaterRecords> GetHabits()
+    {
+        return ExecuteSql("SELECT * FROM drinking_water");
+    }
+    private class DrinkingWaterRecords(int id, string? date, int quantity)
+    {
+        public int Id { get; } = id;
+        public string? Date { get; } = date;
+        public int Quantity { get; } = quantity;
+    } 
+    
     public void ViewHabits()
     {
-        using var reader = ExecuteSql("SELECT * FROM drinking_water");
-        while (reader != null && reader.Read())
+        var records = GetHabits();
+        foreach (var record in records)
         {
-            var id = reader.GetInt32(0);
-            var date = reader.GetString(1);
-            var quantity = reader.GetInt32(2);
-            Console.WriteLine($"Id: {id}, Date: {date}, Quantity: {quantity}");
+            Console.WriteLine($"Id: {record.Id}, Date: {record.Date}, Quantity: {record.Quantity}");
         }
     }
-
+    
     private bool RecordExits(int id)
     {
-        using var reader = ExecuteSql(
-            "SELECT * FROM drinking_water WHERE Id = @id",
+        var records = ExecuteSql(
+            "SELECT Id FROM drinking_water WHERE Id = @id",
             new SqliteParameter("@id", id)
         );
-        return reader != null && reader.Read();
+        return records.Count != 0;
     }
 
     public void DeleteHabit()
