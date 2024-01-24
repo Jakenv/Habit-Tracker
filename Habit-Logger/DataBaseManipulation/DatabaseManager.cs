@@ -71,12 +71,6 @@ public class DatabaseManager
     {
         return ExecuteSql("SELECT * FROM drinking_water");
     }
-    private class DrinkingWaterRecords(int id, string? date, int quantity)
-    {
-        public int Id { get; } = id;
-        public string? Date { get; } = date;
-        public int Quantity { get; } = quantity;
-    } 
     
     public void ViewHabits()
     {
