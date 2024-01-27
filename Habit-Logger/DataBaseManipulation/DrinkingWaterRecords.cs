@@ -1,4 +1,4 @@
-namespace Habit_Loger;
+namespace Habit_Loger.DataBaseManipulation;
 
 public class DrinkingWaterRecords(int id, string? date, int quantity)
 {

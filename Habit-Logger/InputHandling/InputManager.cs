@@ -1,8 +1,16 @@
-namespace Habit_Loger;
+namespace Habit_Loger.InputHandling;
 
-public abstract class InputManager
+public interface IInputManager
 {
-    public static int GetQuantityInput()
+    int GetQuantityInput();
+    string GetDateInput();
+    int GetId();
+    void PressSpaceToContinue();
+}
+
+public class InputManager : IInputManager
+{
+    public int GetQuantityInput()
     {
         while (true)
         {
@@ -17,7 +25,7 @@ public abstract class InputManager
         }
     }
 
-    public static string GetDateInput()
+    public string GetDateInput()
     {
         while (true)
         {
@@ -32,7 +40,7 @@ public abstract class InputManager
         }
     }
 
-    public static int GetId()
+    public int GetId()
     {
         while (true)
         {
@@ -47,7 +55,7 @@ public abstract class InputManager
         }
     }
 
-    public static void PressSpaceToContinue()
+    public void PressSpaceToContinue()
     {
         Console.WriteLine("Press space to continue");
         Console.ReadKey();

@@ -1,9 +1,20 @@
+using Habit_Loger.InputHandling;
 using Microsoft.Data.Sqlite;
 
-namespace Habit_Loger;
+namespace Habit_Loger.DataBaseManipulation;
 
-public class DatabaseManager
+public interface IDatabaseManager
 {
+    void AddHabit();
+    void ViewHabits();
+    void DeleteHabit();
+    void EditHabit();
+    bool RecordExist(int id);
+}
+
+public class DatabaseManager : IDatabaseManager
+{
+    InputManager _inputManager = new();
     private readonly SqliteConnection _connection;
     
     public DatabaseManager(string connectionString)
@@ -13,7 +24,7 @@ public class DatabaseManager
         InitializeDatabase();
     }
 
-    private void InitializeDatabase()
+    public void InitializeDatabase()
     {
         using var command = _connection.CreateCommand();
         command.CommandText =
@@ -58,8 +69,8 @@ public class DatabaseManager
 
     public void AddHabit()
     {
-        var date = InputManager.GetDateInput();
-        var quantity = InputManager.GetQuantityInput();
+        var date = _inputManager.GetDateInput();
+        var quantity = _inputManager.GetQuantityInput();
         ExecuteSql(
             "INSERT INTO drinking_water (DATE, Quantity) VALUES (@date, @quantity)",
             new SqliteParameter("@date", date),
@@ -80,8 +91,8 @@ public class DatabaseManager
             Console.WriteLine($"Id: {record.Id}, Date: {record.Date}, Quantity: {record.Quantity}");
         }
     }
-    
-    private bool RecordExits(int id)
+
+    public bool RecordExist(int id)
     {
         var records = ExecuteSql(
             "SELECT Id FROM drinking_water WHERE Id = @id",
@@ -94,8 +105,8 @@ public class DatabaseManager
     {
         Console.WriteLine("What do you want to delete?\n");
         ViewHabits();
-        var id = InputManager.GetId();
-        if (!RecordExits(id))
+        var id = _inputManager.GetId();
+        if (!RecordExist(id))
             Console.WriteLine("Record don't exist, chose different ID");
         else
         {
@@ -110,13 +121,13 @@ public class DatabaseManager
     {
         Console.WriteLine("What do you want to edit?\n");
         ViewHabits();
-        var id = InputManager.GetId();
-        if (!RecordExits(id))
+        var id = _inputManager.GetId();
+        if (!RecordExist(id))
             Console.WriteLine("Record don't exist, chose different ID");
         else
         {
-            var date = InputManager.GetDateInput();
-            var quantity = InputManager.GetQuantityInput();
+            var date = _inputManager.GetDateInput();
+            var quantity = _inputManager.GetQuantityInput();
             ExecuteSql(
                 "UPDATE drinking_water SET DATE = @date, Quantity = @quantity WHERE Id = @id",
                 new SqliteParameter("@date", date),

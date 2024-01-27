@@ -1,8 +1,9 @@
-﻿using Habit_Loger;
+﻿using Habit_Loger.DataBaseManipulation;
+using Habit_Loger.InputHandling;
 
 const string connectionString = "Data Source=habits.db";
-var databaseManager = new DatabaseManager(connectionString);
-
+IDatabaseManager db = new DatabaseManager(connectionString);
+IInputManager input = new InputManager();
 
 var exitApp = false;
 do
@@ -21,19 +22,19 @@ do
     switch (readInput)
     {
         case "1":
-            databaseManager.AddHabit();
+            db.AddHabit();
             break;
         case "2":
-            databaseManager.ViewHabits();
-            InputManager.PressSpaceToContinue();
+            db.ViewHabits();
+            input.PressSpaceToContinue();
             break;
         case "3":
-            databaseManager.EditHabit();
-            InputManager.PressSpaceToContinue();
+            db.EditHabit();
+            input.PressSpaceToContinue();
             break;
         case "4":
-            databaseManager.DeleteHabit();
-            InputManager.PressSpaceToContinue();
+            db.DeleteHabit();
+            input.PressSpaceToContinue();
             break;
         case "0":
             InputManager.ExitApp();
